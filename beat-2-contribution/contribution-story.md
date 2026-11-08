@@ -55,10 +55,9 @@ happened; these entries are the toolkit's own timeline.
 All four entries are graded. Keep every heading below, and fill each
 one in the week it belongs to.
 
-**Unit 5: [one line on the tool work]**
+**Unit 5: issue-scout, a GitHub-wide search, rank and grade skill**
 
-[2-4 sentences: what you built (the scout, your strategy), what broke
-or fell short, what changed because of it.]
+I built a search strategy of LMCache, ros2_control, Python SDK and Python bug queries with a 16-step ranking filter, and the scout graded the top results with my rubric. My first filters let through 126 results, mostly brand-new hobby repos and bounty bait, so I added drops for zero comments, bounties, stale labels and tracking issues. Every later search I ran, across LMCache, the vLLM and SGLang orgs, Rust, C and C++ repos, and security keywords, hit issues already claimed through open PRs or `/claim` comments, which ranking can't see, so I added `-linked:pr` to the LMCache queries and logged the rest in scan-notes.md. The only issue that passed grading was hypertorch#433, which I claimed on GitHub.
 
 **Unit 6: [one line on the tool work]**
 
