@@ -1,4 +1,4 @@
-# Contribution: [Issue Title]
+# Contribution: Reject unknown `resolve` output formats before loading inputs
 
 Path: `beat-2-contribution/contribution-story.md`
 
@@ -8,10 +8,9 @@ format criteria grade exactly that. Your course repo link is the whole submissio
 files and no evidence uploads are part of Assignment 5.
 
 **Contribution Number:** [1]
-**Student:** [Student name]
-**GitHub Username:** [your GitHub username, exactly as it appears on your profile - no @, no
-profile URL. Your comments upstream are identified by this name.]
-**Issue:** [GitHub issue link]
+**Student:** Shraavasti Bhat
+**GitHub Username:** shraavb
+**Issue:** https://github.com/dsx-ai-factory/nvkr/issues/398
 **Pull Request:** [GitHub PR link, once opened]
 
 One repository, built across units 5 to 8, telling the whole story of your real
@@ -59,11 +58,9 @@ one in the week it belongs to.
 
 I built a search strategy of LMCache, ros2_control, Python SDK and Python bug queries with a 16-step ranking filter, and the scout graded the top results with my rubric. My first filters let through 126 results, mostly brand-new hobby repos and bounty bait, so I added drops for zero comments, bounties, stale labels and tracking issues. Every later search I ran, across LMCache, the vLLM and SGLang orgs, Rust, C and C++ repos, and security keywords, hit issues already claimed through open PRs or `/claim` comments, which ranking can't see, so I added `-linked:pr` to the LMCache queries and logged the rest in scan-notes.md. The only issue that passed grading was hypertorch#433, which I claimed on GitHub.
 
-**Unit 6: [one line on the tool work]**
+**Unit 6: voice-guard, a pre-post check on my own words, and a repo-memory file**
 
-[2-4 sentences: the voice-guard, the repo-memory file. What broke or
-fell short, and what changed because of it. "Nothing broke" counts when
-it is true - say how you know.]
+I merged my three voice guides into one file at `~/.claude/voice-guard/voice-guide.md`, wrote Upstream rules for claims, questions and pings, and hooked `check_voice.py` into Claude Code so every `gh issue comment` is held against them. It fired for real on my claim for nvkr#398: the guard log shows it stopped the first two drafts, quoting my own rules "Promise investigation, never a fix or a date" and "Claim only what I will do next, with a concrete first step", and passed the third. It also has gaps I found: its first manual run passed an empty draft, and it stops `gh issue comment --help` because it can't read a body. For the repo memory file I dropped the `@AGENTS.md` import because nvkr's `CLAUDE.md` is a symlink to `AGENTS.md`, and my scoped orientation corrected a wrong path I had assumed (`pkg/nvkr/planview`, not `internal/planview`), so I wrote the right one into `CLAUDE.local.md`.
 
 **Unit 7: [one line on the tool work]**
 
@@ -79,24 +76,16 @@ drafted, what you did with the draft.]
 
 ## Why I Chose This Issue
 
-[1-2 paragraphs in your own words: how you searched, what your scan
-surfaced, what your scout's verdict said, why this issue fits your
-profile, and what you hope to learn. If your scout's verdict on it
-was reject and you chose it anyway, say so here and say why; choosing
-against your own tool silently is what loses points. Close with an
-honest read of the tool itself: where the scout fell short on a real
-wild search and what you changed or would change, or what convinced
-you it held up. **Record the link to your claim comment in this section too.**
-Not claimed yet? Write `claim pending` and today's date where the link goes,
-and add the link the moment your claim lands.]
+I found nvkr#398 by feeding my scout a list of good-first-issue candidates from a `gfi-watch` scan of the `dsx-ai-factory` org. After the scope patch, the scout graded #398 and #393 as accept: both pass every required check (maintainer committing daily, no assignee or linked PR, no AI ban, one bounded deliverable). Its difficulty notes were **straightforward** for #398, because the issue names `cmd/nvkr/resolve.go` lines 20, 29 and 77, and **moderate** for #393, which spans two files and has a small open question about how directory artifacts are represented. I chose #398 as my main issue and claimed #393 as a second pick for after it. Earlier I graded the three LMCache issues I had picked, #1175, #5313 and #5402, and the scout rejected all three because open PRs and `/claim` comments already covered them, so I did not choose against my scout.
+
+#398 fits my profile: a small logic bug with an exact repro and a stated expected result, in code I can read, with tests to write. It is in Go rather than Python, and I want to learn how a fail-closed CLI validates input before doing any work, and how to write a test for the TUI branch that an invalid value must not reach. My honest read of the scout: it held up on the repo and claim checks, but it can't see `/claim` comments or linked PRs at search time, which is why most of my searches ended in already-taken issues until I added `-linked:pr`. Its `maintainer-responsive` check passes here only because the maintainer left a placeholder "—" on each thread, and the 90-day claim rule read literally would fail an issue on my own claim comment, so I would patch both. Claim comment: https://github.com/dsx-ai-factory/nvkr/issues/398#issuecomment-6716217331
 
 **Toolkit**
 
-- Tool: issue-scout (your scout: your search strategy, your rubric),
-  and how you used it
-- What it produced: [the scan and its verdict on this issue, described]
-- Difficulties: [where it fell short, or "none met" if none did]
-- What changed: [what you patched or would update, or "nothing"]
+- Tool: issue-scout (my search strategy, my rubric), run on hand-fed issue URLs from the `gfi-watch` list, then re-run after the scope patch
+- What it produced: accept for nvkr#398 (difficulty: straightforward) and #393 (moderate), and rejects for LMCache #1175, #5313 and #5402
+- Difficulties: it treated my own claim comment as a possible active claim, and its `maintainer-responsive` check passed on a placeholder comment
+- What changed: I replaced `scope-bounded` with `scope-feasible` plus a difficulty note, logged the claim and responsiveness tensions in scan-notes.md, and would patch both checks
 
 ---
 
@@ -131,31 +120,46 @@ and add the link the moment your claim lands.]
 
 **Environment Setup**
 
-[What a stranger would need to stand this up: your operating system,
-the relevant versions (language, runtime, package manager, the project
-itself), and how you set the project up. Then the challenges you faced
-and how you solved them, or that none came up.]
+macOS on Apple Silicon (Darwin kernel 24.6.0, arm64), Go 1.27.3 (the repo pins this in `.go-version`), and upstream `dsx-ai-factory/nvkr` at `origin/main` commit `95b61bc50d7472b0a4e3b503607d6e7b833403c3`. The issue's links pin `799db0c5`; main has moved since, and the `resolve` behavior below is unchanged. I used a clean detached worktree of `origin/main`, with none of my branch changes, and built it with `GOTOOLCHAIN=local go build -o /tmp/nvkr-main-bin ./cmd/nvkr`. Below, `nvkr` means that binary. Challenge: my working branch already had a fix in progress, so I reproduced in a separate clean worktree to be sure I was seeing main's behavior, not mine.
 
 **Steps to Reproduce**
 
-1. [Step 1]
-2. [Step 2]
-3. [Observed result]
+From the repo root, with the binary built above:
+
+1. Typo format on a valid catalog (the issue's command): `nvkr resolve --data inputs/catalogs/nvke/module-tags --component nvkectl --platform linux/amd64 --output jsno`
+2. Pair the typo with a catalog that does not exist, to see whether the format is checked first: `nvkr resolve --data /nonexistent --component nvkectl --platform linux/amd64 --output jsno`
+3. For contrast, a valid format with the same bad catalog: `nvkr resolve --data /nonexistent --component nvkectl --platform linux/amd64 --output ir`
+4. Compare step 1's stdout with the default (`ir`) output using `cmp`.
+5. Observed result: the typo is accepted as if it were valid (see evidence).
 
 **Reproduction Evidence**
 
-- **Commit showing reproduction:** [link to commit in your fork]
-- **Screenshots/logs:** [if applicable]
-- **My findings:** [what you discovered during reproduction; an
-  honest, evidenced cannot-reproduce that led you to re-pick or ask
-  the maintainer belongs here and costs you nothing]
+- **Commit showing reproduction:** none (no changes; this is `origin/main` at `95b61bc5`)
+- **Screenshots/logs:**
+
+  Step 1: exit `0`, stderr empty (0 bytes), stdout 82 lines. First lines and last line:
+  ```
+  nodes:
+  - artifactPath: cli/bin/nvkectl
+    builderType: oci-hermetic
+  ...
+  # buildDigest: sha256:999b5af0f81e18412b137705621ab279e3788a266e1b5a961d770045100af1ef
+  ```
+  Step 2:
+  ```
+  nvkr: [NVKR-E-INVALID-CATALOG] reading registry.yaml from dir:/nonexistent: no such file or directory
+  exit=16
+  ```
+  Step 3 (valid format, same bad catalog): the identical line, `exit=16`.
+  Step 4: `cmp` printed nothing and exited 0.
+- **My findings:** The bug reproduces. `--output jsno` exits 0 and prints the full YAML graph, byte-identical to the default `ir` output, so a misspelled format silently falls back to the default. The format is also not checked before the catalog is loaded: step 2 fails on the catalog (exit 16), the same as a valid format would in step 3, where the issue expects a usage error (exit 2, `CodeUsage`) naming the five accepted formats and no graph.
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: repro-check, run on `claim-draft.md` (my posted claim) and `repro-draft.md` against issue #398
+- What it produced: accept on all eight checks. The first pass also left voice-guide notes: paste real output for steps 1, 3 and 4, name which binary `nvkr` means, and fix "macOS 24.6.0", which is the Darwin kernel version
+- Difficulties: it had no way to check the repro itself, so it graded my claimed outputs, which I had to run myself; it also noted that my claim says "DCO sign-off" but the repo requires `-S` as well as `-s`
+- What changed: I pasted the missing output, named the binary and corrected the OS line, and I will mention the signing requirement in my plan comment
 
 ---
 
