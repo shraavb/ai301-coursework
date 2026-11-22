@@ -18,7 +18,7 @@ Same scout as contribution 1. It graded #393 as accept (difficulty: moderate), b
 
 **Unit 6: voice-guard and a repo-memory file**
 
-Same voice guard and `CLAUDE.local.md` as contribution 1. No voice-guard stop is recorded for #393.
+Same voice guard and `CLAUDE.local.md` as contribution 1. The guard stopped the `gh pr create` for #510 twice on 2026-11-15, at 20:44 ("Paste test output, do not summarize it") and 20:45 ("Test evidence is the command and the output I saw, before and after, for each outcome the plan's test plan named."), and passed it at 20:47.
 
 **Unit 7: ship-gate and a gate manifest**
 
@@ -184,10 +184,10 @@ Pushed `3758a342` at 16:45 addressing all six findings and the three recommendat
 
 **Toolkit**
 
-- Tool: none recorded for opening the PR; no voice-guard stop is recorded, and the ship-gate did not run on this PR
-- What it produced: nothing recorded
-- Difficulties: none met; both commits carry only my `Signed-off-by`, with no agent trailer
-- What changed: nothing
+- Tool: voice-guard, which holds `gh pr create` until the description passes my Upstream rules; the ship-gate did not run on this PR (there is no gate log)
+- What it produced: two stops on 2026-11-15, at 20:44 and 20:45, then a pass at 20:47, three minutes before the PR opened
+- Difficulties: the guard reads the description, not the commits; both commits carry only my `Signed-off-by`, with no agent trailer
+- What changed: the description pasted real before and after command output before it passed
 
 ---
 
